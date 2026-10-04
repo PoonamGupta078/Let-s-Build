@@ -34,8 +34,15 @@ vendor/tracex = read-only TraceX reference code to adapt.
 - SEE detection engine (see/rules.py, see/run.py, see/models.py) + tests/test_see.py: done.
   Three rules (rapid pass-through, high activity, fan-in/fan-out), all thresholds configurable.
 - TRACE module (trace/run.py, trace/models.py, trace/config.py) + tests/test_trace.py: done.
-  Wraps core/taint.py with structured output, SEE alert adapter, per-currency mode.
-  Full suite: 99 passing.
+  Wraps core/taint.py unchanged; per-currency mode, SEE alert adapter, exit reporting,
+  greedy provenance paths, full validation (NaT/duplicates/negative/NaN).
+  29 tests (25 required + CUT regression + 3 extras). Full suite: 113 passing.
+- CUT module (cut/run.py, cut/models.py, cut/config.py) + tests/test_cut.py: done.
+  Wraps core.freeze.plan() and core.freeze.block_all() unchanged; greedy ranked
+  recommendations + block_all unranked cut-set; per-currency safety;
+  advisory-only output with structured evidence, rationale, and disclaimers.
+  38 tests (greedy/block_all, ranking, validation, serialization, regression).
+  Full suite: 151 passing.
 - Everything else: not started.
 
 ## Glossary
