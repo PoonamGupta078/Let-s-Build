@@ -88,6 +88,11 @@ def build_graph(
                 if k != "account_id" and pd.notna(v)
             }
             account_rows[aid] = {k: str(v) if isinstance(v, str) else v for k, v in attrs.items()}
+    elif accounts is not None:
+        warnings.append(
+            "accounts DataFrame provided but has no 'account_id' column; "
+            "node metadata and missing-reference check skipped"
+        )
 
     missing_accounts = all_accounts - account_set if account_set else set()
 

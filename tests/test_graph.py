@@ -169,3 +169,14 @@ def test_invalid_cutoff_raises():
         graph_as_of(G, pd.NaT)
     with pytest.raises(ValueError):
         graph_as_of(G, "not-a-timestamp")
+
+def test_malformed_accounts_without_account_id_warns():
+    """When accounts is provided but has no account_id column, build_graph
+    must warn explicitly instead of silently skipping the metadata check."""
+    bad_accounts = pd.DataFrame(
+        [("A", 1000), ("B", 2000)],
+        columns=["name", "balance"],
+    )
+    result = build_graph(FIXTURE_TXNS, bad_accounts)
+    assert any("account_id" in w for w in result.warnings)
+    assert result.missing_accounts == set()  # check skipped, not falsely populated
