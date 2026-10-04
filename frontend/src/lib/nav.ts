@@ -68,7 +68,7 @@ export const PAGE_META: Record<string, PageMeta> = {
   },
   "/alerts": {
     title: "Alerts & Cases",
-    subtitle: "Review, triage and assign system-generated alerts.",
+    subtitle: "Review suspicious activity and manage active investigations.",
   },
   "/investigations": {
     title: "Investigations",

@@ -28,7 +28,8 @@ vendor/tracex = read-only TraceX reference code to adapt.
 - core/taint.py, core/freeze.py, tests/test_core.py: done, 8 tests passing.
 - ingestion (schema, validation, IBM loader, reproducible sample) + tests/test_ingestion.py: done.
   Full suite: 21 passing. Raw IBM files live in data/ (gitignored); processed outputs in data/processed/.
-- Everything else: not started.
+- Frontend prompt 1 (foundation + dashboard) and prompt 2 (Alerts & Cases queue, /investigations/[id] stub): done.
+  Frontend only; lint + build clean. Graph/SEE, fusion, alerts, evidence, API, copilot: not started.
 
 ## Glossary
 tainted rupees = estimated rupees traceable to confirmed-bad funds. hold = recommendation to freeze an account

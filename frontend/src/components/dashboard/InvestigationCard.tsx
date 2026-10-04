@@ -6,13 +6,13 @@ import { RiskBadge } from "@/components/ui/RiskBadge";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 
 /**
- * Active investigation card. Clicking opens the case — routed to the
- * investigations workspace (detail view arrives with a later prompt).
+ * Active investigation card. Clicking opens the case workspace at
+ * /investigations/[id] (the workspace itself arrives with a later prompt).
  */
 export function InvestigationCard({ caseData }: { caseData: Case }) {
   return (
     <Link
-      href="/investigations"
+      href={`/investigations/${caseData.id}`}
       className="panel group flex flex-col gap-3 p-4 transition-colors hover:border-line-strong"
     >
       <div className="flex items-start justify-between gap-2">

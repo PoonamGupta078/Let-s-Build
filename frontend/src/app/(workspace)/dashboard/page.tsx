@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Clock, ShieldCheck, Siren, IndianRupee, Gavel } from "lucide-react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { MetricCard } from "@/components/ui/MetricCard";
@@ -75,12 +76,12 @@ export default function DashboardPage() {
           title="Priority Alerts"
           subtitle="Highest-risk suspicious activity requiring review"
           action={
-            <a
+            <Link
               href="/alerts"
               className="text-xs font-medium text-violet transition-colors hover:text-purple hover:underline"
             >
               View all alerts →
-            </a>
+            </Link>
           }
         />
         <AlertTable alerts={priorityAlerts} />
@@ -92,12 +93,12 @@ export default function DashboardPage() {
           title="Active Investigations"
           subtitle="Open cases — click a case to enter its workspace"
           action={
-            <a
+            <Link
               href="/investigations"
               className="text-xs font-medium text-violet transition-colors hover:text-purple hover:underline"
             >
               View all cases →
-            </a>
+            </Link>
           }
         />
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">

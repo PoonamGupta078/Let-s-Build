@@ -36,6 +36,11 @@ export interface Alert {
   /** ISO-8601 creation time. */
   timestamp: string;
   status: AlertStatus;
+  /**
+   * Case this alert was escalated into, if any. Optional on purpose: most
+   * alerts are not yet cases, so the UI must never imply otherwise.
+   */
+  caseId?: string;
 }
 
 /** Investigation case grouping related alerts. */
