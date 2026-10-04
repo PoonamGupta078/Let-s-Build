@@ -1,16 +1,6 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-import { getInvestigation } from "@/lib/investigation";
-import { InvestigationHeader } from "@/components/investigation/InvestigationHeader";
-import { InvestigationWorkflow } from "@/components/investigation/InvestigationWorkflow";
-import { InvestigationSummary } from "@/components/investigation/InvestigationSummary";
-import { InvestigationFacts } from "@/components/investigation/InvestigationFacts";
-import { TraceSection } from "@/components/investigation/TraceSection";
-import { MoneyFlowSummary } from "@/components/investigation/MoneyFlowSummary";
-import { DetectionFindings } from "@/components/investigation/DetectionFindings";
-import { InvestigationTimeline } from "@/components/investigation/InvestigationTimeline";
-import { EvidencePreview } from "@/components/investigation/EvidencePreview";
-import { DecisionPanel } from "@/components/investigation/DecisionPanel";
+import { InvestigationWorkspace } from "@/components/investigation/InvestigationWorkspace";
+import { PageHeader } from "@/components/ui/PageHeader";
 
 export const metadata: Metadata = { title: "Investigation" };
 
@@ -19,39 +9,19 @@ interface PageProps {
 }
 
 /**
- * Investigation workspace — the central console where GRAPH / TRACE / CUT /
- * EVIDENCE / CLINE eventually come together. Currently the SEE stage: header,
- * workflow, graph placeholder, money-flow summary, findings, timeline and the
- * human decision area.
+ * Investigation workspace — the transaction graph at the centre, with SEE
+ * evidence, TRACE propagation and CUT recommendations connected to the real
+ * API. All data is the synthetic demo case; a human always decides.
  */
 export default async function InvestigationPage({ params }: PageProps) {
   const { id } = await params;
-  const investigation = getInvestigation(id);
-  if (!investigation) notFound();
-
   return (
     <div className="space-y-6">
-      <InvestigationHeader investigation={investigation} />
-      <InvestigationWorkflow active="SEE" />
-      <InvestigationSummary investigation={investigation} />
-
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-        {/* Primary column: graph + money flow */}
-        <div className="space-y-6 xl:col-span-2">
-          <TraceSection investigation={investigation} />
-          <MoneyFlowSummary investigation={investigation} />
-        </div>
-
-        {/* Right panel: facts + findings + evidence */}
-        <div className="space-y-6">
-          <InvestigationFacts investigation={investigation} />
-          <DetectionFindings findings={investigation.findings} />
-          <EvidencePreview summary={investigation.evidenceSummary} />
-        </div>
-      </div>
-
-      <InvestigationTimeline events={investigation.timeline} />
-      <DecisionPanel />
+      <PageHeader
+        title="Investigation Workspace"
+        subtitle="SEE → TRACE → CUT over the synthetic demo case"
+      />
+      <InvestigationWorkspace initialAlertId={decodeURIComponent(id)} />
     </div>
   );
 }

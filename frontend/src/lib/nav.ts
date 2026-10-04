@@ -8,6 +8,7 @@ import {
   FileCheck,
   FolderSearch,
   LayoutDashboard,
+  Network,
   ScrollText,
   Siren,
   type LucideIcon,
@@ -30,6 +31,7 @@ export const NAV_SECTIONS: NavSection[] = [
   {
     items: [
       { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+      { label: "Graph Explorer", href: "/graph", icon: Network },
       {
         label: "Alerts & Cases",
         href: "/alerts",
@@ -65,6 +67,10 @@ export const PAGE_META: Record<string, PageMeta> = {
   "/dashboard": {
     title: "Investigation Dashboard",
     subtitle: "Monitor suspicious activity, active cases, and fund-flow investigations.",
+  },
+  "/graph": {
+    title: "Graph Explorer",
+    subtitle: "Interactive fund-flow network with SEE evidence and TRACE highlighting.",
   },
   "/alerts": {
     title: "Alerts & Cases",

@@ -237,3 +237,108 @@ export interface InvestigatorProfile {
   role: string;
   initials: string;
 }
+
+/** ---------- Backend API shapes (truthful SEE / TRACE / CUT / graph) ---------- */
+
+/** SEE alert as returned by GET /api/alerts. */
+export interface SeeAlert {
+  alert_id: string;
+  rule_id: string;
+  rule_name: string;
+  account: string;
+  score: number;
+  window_start: string;
+  window_end: string;
+  evidence_txn_ids: string[];
+  explanation: string;
+  disclaimer: string;
+}
+
+export interface GraphNode {
+  id: string;
+  role?: string | null;
+  is_exit: boolean;
+}
+
+export interface GraphEdge {
+  txn_id: string;
+  source: string;
+  target: string;
+  amount: number;
+  ts: string;
+  channel?: string | null;
+  type?: string | null;
+}
+
+export interface GraphData {
+  nodes: GraphNode[];
+  edges: GraphEdge[];
+  demo: boolean;
+}
+
+export interface TraceStep {
+  txn_id: string;
+  src: string;
+  dst: string;
+  ts: string;
+  amount: number;
+  currency: string;
+  tainted_amount: number;
+  allocation_ratio: number;
+  reason: string;
+}
+
+export interface TracePath {
+  endpoint: string;
+  endpoint_tainted: number;
+  currency: string;
+  steps: TraceStep[];
+  greedy: boolean;
+}
+
+export interface TraceData {
+  seed_account: string;
+  seed_amount: number;
+  seed_currency: string;
+  tainted_accounts: Record<string, Record<string, number>>;
+  exit_taint_by_currency: Record<string, number>;
+  paths: TracePath[];
+  disclaimer: string;
+}
+
+export interface CutRecommendation {
+  account: string;
+  rank: number | null;
+  strategy: string;
+  evidence_txn_ids: string[];
+  estimated_tainted_blocked: number | null;
+  estimated_clean_disrupted: number | null;
+  minutes_until_exit: number | null;
+  rationale: string;
+  currency: string;
+}
+
+export interface CutData {
+  strategy: string;
+  seed_accounts: string[];
+  exit_accounts: string[];
+  baseline_exit_taint: number;
+  total_tainted_blocked: number;
+  pct_blocked: number | null;
+  recommendations: CutRecommendation[];
+  aggregate_clean_held: number | null;
+  disclaimer: string;
+}
+
+/** Dashboard summary from GET /api/overview. */
+export interface OverviewData {
+  demo: boolean;
+  data_source: string;
+  accounts: number;
+  transactions: number;
+  alerts: number;
+  rule_distribution: Record<string, number>;
+  exits: number;
+  seed_accounts: number;
+}
+

@@ -12,7 +12,7 @@ not regulatory-compliant, and does not claim proven fraud-detection effectivenes
 ## Run
     python -m venv .venv && source .venv/bin/activate     # Windows: .venv\Scripts\activate
     pip install -r requirements.txt
-    python -m pytest -q                                   # full suite: 179 passing
+    python -m pytest -q                                   # full suite: 186 passing
 
 ## Demo (one command)
 
@@ -35,6 +35,34 @@ Frontend (mock-data UI — not yet connected to the backend):
 - **Not production-ready or regulatory-compliant.** Fund propagation is estimated; money is
   fungible; recommendations are advisory and a human decides.
 
+## Backend API (FastAPI, demo)
+
+The frontend connects to a small read-only FastAPI backend that wraps the SEE / TRACE / CUT
+engines and serves the synthetic demo case. Run it alongside the frontend:
+
+    python -m uvicorn api.main:app --reload --port 8000
+
+Endpoints: `/api/health`, `/api/overview`, `/api/alerts` (SEE), `/api/graph`,
+`/api/trace`, `/api/cut`.
+See `docs/api_contract.md`. Set `NEXT_PUBLIC_API_URL` if the backend is not on
+`http://localhost:8000`. Data is synthetic; no freeze is executed.
+
+## Frontend (Next.js dashboard)
+
+Launch (run the backend first):
+
+    cd frontend && npm install && npm run dev   # http://localhost:3000
+
+Connected to the API (real synthetic-demo data):
+- `/dashboard` — account/transaction/alert counts, rule distribution, recent alerts, graph preview
+- `/graph` — Graph Explorer (Cytoscape.js: pan/zoom/fit, layout switch, evidence + TRACE highlighting)
+- `/alerts` — SEE alert queue (rule, score, account, explanation, evidence) with search/filter/sort
+- `/investigations/[id]` — investigation workspace (graph centre + SEE/TRACE/CUT panels)
+
+Not yet connected (placeholder pages): `/data`, `/model-status`, `/evidence`, `/audit-log`.
+
+Frontend dependencies added: `cytoscape`, `@types/cytoscape`, `clsx`.
+
 ## Neo4j setup (optional)
 - Prerequisites: Neo4j 4.4+ or 5.x server, reachable from this machine.
 - Copy `.env.example` to `.env` and set:
@@ -47,6 +75,8 @@ Frontend (mock-data UI — not yet connected to the backend):
 - Run the connectivity and sample-load check:
       python scripts/neo4j_check.py
   If the environment is not configured, the script reports that clearly.
+- Load the synthetic demo case into Neo4j (optional — enables the Neo4j-backed graph):
+      python scripts/load_demo_neo4j.py
 - Run unit tests (mocked driver, no live database required):
       python -m pytest tests/test_neo4j_integration.py -q
   Live integration tests are marked separately and skipped automatically
@@ -59,8 +89,8 @@ Frontend (mock-data UI — not yet connected to the backend):
 ## Layout
 core/ (TRACE + CUT, done) · ingestion/ graph/ see/ (SEE detection, done) ·
 neo4j/ (integration, done) · trace/ cut/ (wrappers, done) · models/ (ML baseline + GNN, experimental) ·
-frontend/ (dashboard, alerts, workspace — mock data) ·
-detect/ fusion/ alerts/ evidence/ api/ copilot/ (not started) ·
+frontend/ (dashboard, alerts, workspace — connected to demo API) ·
+api/ (FastAPI demo endpoints) · detect/ fusion/ alerts/ evidence/ copilot/ (not started) ·
 scripts/ · docs/ · vendor/tracex (read-only reference) · .clinerules/
 
 ## Reused vs built
