@@ -28,6 +28,9 @@ vendor/tracex = read-only TraceX reference code to adapt.
 - core/taint.py, core/freeze.py, tests/test_core.py: done, 8 tests passing.
 - ingestion (schema, validation, IBM loader, reproducible sample) + tests/test_ingestion.py: done.
   Full suite: 21 passing. Raw IBM files live in data/ (gitignored); processed outputs in data/processed/.
+- graph/build.py (MultiDiGraph construction, missing-account detection) +
+  graph/views.py (asof cutoff, case subgraph) + tests/test_graph.py: done.
+  Full suite: 35 passing.
 - Everything else: not started.
 
 ## Glossary
