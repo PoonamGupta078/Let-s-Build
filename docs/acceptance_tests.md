@@ -10,7 +10,7 @@
 | 6 | Block-all finds `{M1, M2}` after the seed has paid out, and `{S}` before | passing |
 | 7 | `plan()` reports minutes until exit and clean ₹ held | passing |
 | 8 | Top paths run seed → exit; downstream exits sum to ₹10L | passing |
-| 9 | Validation rejects negative amounts, src = dst and duplicate `txn_id`; counts shown | to write |
+| 9 | Validation rejects negative amounts, src = dst and duplicate `txn_id`; counts shown | passing |
 | 10 | Pseudonymised IDs differ with a different key; no raw account number in logs | to write |
 | 11 | Detectors: ₹9L→₹5→₹3 not flagged; 200-day round trip not flagged | to write |
 | 12 | Alerts exist at account, edge and ring level on the seeded case | to write |

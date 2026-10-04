@@ -5,6 +5,10 @@ node_modules/
 .next/
 .env
 data/*.csv
+data/processed/*
+!data/processed/.gitkeep
+data/samples/*
+!data/samples/.gitkeep
 models/weights/*
 !models/weights/.gitkeep
 *.pdf

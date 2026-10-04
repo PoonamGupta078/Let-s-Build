@@ -5,7 +5,7 @@ hold recommendations (CUT) and a Cline-powered investigator copilot. Recommendat
 ## Run
     python -m venv .venv && source .venv/bin/activate     # Windows: .venv\Scripts\activate
     pip install -r requirements.txt
-    python -m pytest -q                                   # core: 8 passing
+    python -m pytest -q                                   # full suite: 21 passing
 
 ## Layout
 core/ (TRACE + CUT, done) · ingestion/ graph/ models/ detect/ fusion/ alerts/ evidence/ (to build) ·

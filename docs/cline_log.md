@@ -2,3 +2,4 @@
 | Time | Who | Mode / command | Prompt (short) | What Cline produced | What we changed |
 |---|---|---|---|---|---|
 | 2026-10-04 | Cline (act) | git init/commit/push | Push all current work to github.com/PoonamGhupta078/Let-s-Build | Initial commit 370027e (51 files), merged GitHub's README commit, pushed main = 7757f2f; verified remote matches local | No source files changed; added .git, commit history, remote origin |
+| 2026-10-04 | Cline (act) | milestone 1 | Implement Milestone 1 only: setup, dependencies, IBM data inspection, ingestion, validation, tests | Verified real IBM schema from files; installed requirements.txt into .venv; added ingestion/ (schema.py, validate.py, load.py), scripts/inspect_data.py, scripts/build_dataset.py, tests/test_ingestion.py + fixtures; ran pytest: 21 passed | New ingestion modules + tests; docs updated; raw CSVs untouched, label split into labels.csv |
