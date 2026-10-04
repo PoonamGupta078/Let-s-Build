@@ -31,6 +31,11 @@ vendor/tracex = read-only TraceX reference code to adapt.
 - graph/build.py (MultiDiGraph construction, missing-account detection) +
   graph/views.py (asof cutoff, case subgraph) + tests/test_graph.py: done.
   Full suite: 35 passing.
+- SEE detection engine (see/rules.py, see/run.py, see/models.py) + tests/test_see.py: done.
+  Three rules (rapid pass-through, high activity, fan-in/fan-out), all thresholds configurable.
+- TRACE module (trace/run.py, trace/models.py, trace/config.py) + tests/test_trace.py: done.
+  Wraps core/taint.py with structured output, SEE alert adapter, per-currency mode.
+  Full suite: 99 passing.
 - Everything else: not started.
 
 ## Glossary

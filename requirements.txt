@@ -7,4 +7,6 @@ uvicorn
 httpx
 pydantic
 fpdf2
+neo4j
+python-dotenv
 pytest
