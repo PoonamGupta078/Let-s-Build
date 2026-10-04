@@ -28,9 +28,20 @@ vendor/tracex = read-only TraceX reference code to adapt.
 - core/taint.py, core/freeze.py, tests/test_core.py: done, 8 tests passing.
 - ingestion (schema, validation, IBM loader, reproducible sample) + tests/test_ingestion.py: done.
   Full suite: 21 passing. Raw IBM files live in data/ (gitignored); processed outputs in data/processed/.
+- graph/build.py (MultiDiGraph construction, missing-account detection) +
+  graph/views.py (asof cutoff, case subgraph) + tests/test_graph.py: done.
+- SEE detection engine (see/rules.py, see/run.py, see/models.py) + tests/test_see.py: done.
+  Three rules (rapid pass-through, high activity, fan-in/fan-out), all thresholds configurable.
+- TRACE module (trace/run.py, trace/models.py, trace/config.py) + tests/test_trace.py: done.
+  Wraps core/taint.py unchanged; per-currency mode, SEE alert adapter, exit reporting,
+  greedy provenance paths, full validation (NaT/duplicates/negative/NaN).
+- CUT module (cut/run.py, cut/models.py, cut/config.py) + tests/test_cut.py: done.
+  Wraps core.freeze.plan() and core.freeze.block_all() unchanged; greedy ranked
+  recommendations + block_all unranked cut-set; per-currency safety;
+  advisory-only output with structured evidence, rationale, and disclaimers.
 - Frontend prompt 1 (foundation + dashboard), prompt 2 (Alerts & Cases queue) and
-  prompt 3 (Investigation Workspace) : done. Frontend only; lint + build clean.
-  Graph (Cytoscape), TRACE, CUT, evidence generation, API, copilot: not started.
+  prompt 3 (Investigation Workspace): done. Frontend only; lint + build clean.
+- Everything else (graph visualisation via Cytoscape, evidence generation, API, copilot): not started.
 
 ## Glossary
 tainted rupees = estimated rupees traceable to confirmed-bad funds. hold = recommendation to freeze an account

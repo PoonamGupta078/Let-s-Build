@@ -1,0 +1,42 @@
+"""TRACE configuration."""
+from __future__ import annotations
+
+import math
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True)
+class TraceConfig:
+    """Configuration for TRACE propagation.
+
+    Attributes
+    ----------
+    currency_mode : str
+        ``"per_currency"`` (default) propagates taint independently within each
+        currency.  ``"single"`` treats all amounts as fungible; the caller
+        asserts that all amounts share one currency.
+    max_paths : int
+        Maximum number of greedy provenance paths to return.
+    min_tainted_threshold : float
+        Accounts or edges with tainted amount below this are excluded from
+        the result.
+    """
+
+    currency_mode: str = "per_currency"
+    max_paths: int = 10
+    min_tainted_threshold: float = 1e-6
+
+    def __post_init__(self) -> None:
+        if self.currency_mode not in ("per_currency", "single"):
+            raise ValueError(
+                f"currency_mode must be 'per_currency' or 'single', "
+                f"got {self.currency_mode!r}"
+            )
+        if not isinstance(self.max_paths, int) or self.max_paths < 1:
+            raise ValueError(f"max_paths must be an integer >= 1, got {self.max_paths!r}")
+        if not math.isfinite(self.min_tainted_threshold) or self.min_tainted_threshold < 0:
+            raise ValueError(
+                f"min_tainted_threshold must be finite and >= 0, "
+                f"got {self.min_tainted_threshold!r}"
+            )
+ 
