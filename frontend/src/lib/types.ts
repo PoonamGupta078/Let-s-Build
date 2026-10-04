@@ -60,6 +60,79 @@ export interface Case {
   lastActivity: string;
 }
 
+/**
+ * One explainable detector finding. These are evidence/finding summaries,
+ * never a final investigator decision.
+ */
+export interface DetectorFinding {
+  id: string;
+  pattern: DetectionPattern;
+  detected: boolean;
+  /** 0-100 contribution/severity. */
+  contribution: number;
+  explanation: string;
+}
+
+/** Chronological event for the investigation timeline (future audit trail). */
+export interface TimelineEvent {
+  id: string;
+  /** ISO-8601 */
+  timestamp: string;
+  event: string;
+  description: string;
+}
+
+/** Compact evidence metadata for the evidence preview panel. */
+export interface EvidenceSummary {
+  linkedTransactions: number;
+  detectorFindings: number;
+  status: "NOT_STARTED" | "DRAFT" | "READY";
+  /** ISO-8601 */
+  lastUpdated: string;
+}
+
+/** One hop of the money-flow summary (Source → … → Exit). */
+export interface MoneyFlowStage {
+  label: string;
+  amount: number;
+  note: string;
+}
+
+/** Stages of the investigation workflow bar. */
+export type InvestigationStage =
+  | "SEE"
+  | "TRACE"
+  | "CUT"
+  | "EVIDENCE"
+  | "CLINE"
+  | "DECISION";
+
+/**
+ * Full investigation workspace payload. API-shaped for GET /api/case;
+ * `id` is the case id, or the alert id when the alert has no case yet.
+ */
+export interface Investigation {
+  id: string;
+  /** Alert that seeded this investigation, when available. */
+  alertId?: string;
+  title: string;
+  riskScore: number;
+  status: AlertStatus;
+  primaryAccount: string;
+  pattern: DetectionPattern;
+  taintedAmount: number;
+  accountsInvolved: number;
+  transactions: number;
+  potentialExits: number;
+  investigator: string;
+  /** ISO-8601 */
+  lastActivity: string;
+  findings: DetectorFinding[];
+  timeline: TimelineEvent[];
+  evidenceSummary: EvidenceSummary;
+  moneyFlow: MoneyFlowStage[];
+}
+
 /** Dashboard KPI tile. */
 export interface Kpi {
   id: string;
