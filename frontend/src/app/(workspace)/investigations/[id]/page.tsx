@@ -5,7 +5,7 @@ import { InvestigationHeader } from "@/components/investigation/InvestigationHea
 import { InvestigationWorkflow } from "@/components/investigation/InvestigationWorkflow";
 import { InvestigationSummary } from "@/components/investigation/InvestigationSummary";
 import { InvestigationFacts } from "@/components/investigation/InvestigationFacts";
-import { GraphPlaceholder } from "@/components/investigation/GraphPlaceholder";
+import { TraceSection } from "@/components/investigation/TraceSection";
 import { MoneyFlowSummary } from "@/components/investigation/MoneyFlowSummary";
 import { DetectionFindings } from "@/components/investigation/DetectionFindings";
 import { InvestigationTimeline } from "@/components/investigation/InvestigationTimeline";
@@ -38,7 +38,7 @@ export default async function InvestigationPage({ params }: PageProps) {
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
         {/* Primary column: graph + money flow */}
         <div className="space-y-6 xl:col-span-2">
-          <GraphPlaceholder />
+          <TraceSection investigation={investigation} />
           <MoneyFlowSummary investigation={investigation} />
         </div>
 

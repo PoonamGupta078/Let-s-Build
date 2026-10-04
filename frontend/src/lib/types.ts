@@ -98,6 +98,56 @@ export interface MoneyFlowStage {
   note: string;
 }
 
+/** Role of a node in the transaction network. */
+export type GraphNodeRole =
+  | "SOURCE"
+  | "MULE"
+  | "INTERMEDIARY"
+  | "DESTINATION"
+  | "EXIT";
+
+/** A vertex in the investigation transaction network. */
+export interface InvestigationGraphNode {
+  /** Pseudonymised account id. */
+  id: string;
+  role: GraphNodeRole;
+  risk: RiskLevel;
+  /** Total rupees received by this account (inflow). */
+  inflow: number;
+  /** Total rupees sent by this account (outflow). */
+  outflow: number;
+  /** Number of transactions this account is party to (in + out). */
+  transactions: number;
+}
+
+/** A directed transaction between two accounts. */
+export interface InvestigationGraphEdge {
+  /** Transaction / reference id. */
+  id: string;
+  source: string;
+  target: string;
+  amount: number;
+  currency: string;
+  /** ISO-8601 timestamp. */
+  timestamp: string;
+}
+
+/** The transaction network for an investigation (graph payload). */
+export interface InvestigationGraphData {
+  nodes: InvestigationGraphNode[];
+  edges: InvestigationGraphEdge[];
+}
+
+/**
+ * Highlight model applied to the graph after a successful TRACE run: the
+ * node/edge ids that belong to the trace result. Traced elements are
+ * emphasised; everything else is subdued. Produced by lib/traceMap.ts.
+ */
+export interface GraphHighlight {
+  nodeIds: ReadonlySet<string>;
+  edgeIds: ReadonlySet<string>;
+}
+
 /** Stages of the investigation workflow bar. */
 export type InvestigationStage =
   | "SEE"
@@ -131,6 +181,7 @@ export interface Investigation {
   timeline: TimelineEvent[];
   evidenceSummary: EvidenceSummary;
   moneyFlow: MoneyFlowStage[];
+  graph: InvestigationGraphData;
 }
 
 /** Dashboard KPI tile. */

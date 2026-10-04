@@ -12,6 +12,9 @@ import type {
   DetectorFinding,
   EvidenceSummary,
   Investigation,
+  InvestigationGraphData,
+  InvestigationGraphEdge,
+  InvestigationGraphNode,
   MoneyFlowStage,
   TimelineEvent,
 } from "@/lib/types";
@@ -178,6 +181,149 @@ function seedAlertFor(caseId: string): Alert | undefined {
     .sort((a, b) => b.riskScore - a.riskScore)[0];
 }
 
+/**
+ * Deterministic FNV-1a hash → hex string, used to derive stable pseudo
+ * account ids from an investigation id (no randomness; same case → same graph).
+ */
+function pseudoAccountId(seed: string, index: number): string {
+  let h = 0x811c9dc5;
+  const s = `${seed}:${index}`;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  return `acct_${(h >>> 0).toString(16).padStart(8, "0")}`;
+}
+
+/**
+ * Build a deterministic demo transaction network for an investigation.
+ * A believable SOURCE → MULE → INTERMEDIARY → DESTINATION/EXIT chain with a
+ * few branches; amounts are fixed fractions of the case's tainted rupees.
+ * API-shaped so GET /api/... graph data can replace it without touching the
+ * visualisation.
+ */
+function buildGraph(
+  investigationId: string,
+  primaryAccount: string,
+  taintedAmount: number,
+): InvestigationGraphData {
+  const id = (i: number) => pseudoAccountId(investigationId, i);
+
+  const source: InvestigationGraphNode = {
+    id: primaryAccount,
+    role: "SOURCE",
+    risk: "CRITICAL",
+    inflow: 0,
+    outflow: 0,
+    transactions: 0,
+  };
+  const muleA: InvestigationGraphNode = {
+    id: id(1),
+    role: "MULE",
+    risk: "HIGH",
+    inflow: 0,
+    outflow: 0,
+    transactions: 0,
+  };
+  const muleB: InvestigationGraphNode = {
+    id: id(2),
+    role: "MULE",
+    risk: "HIGH",
+    inflow: 0,
+    outflow: 0,
+    transactions: 0,
+  };
+  const interA: InvestigationGraphNode = {
+    id: id(3),
+    role: "INTERMEDIARY",
+    risk: "MEDIUM",
+    inflow: 0,
+    outflow: 0,
+    transactions: 0,
+  };
+  const interB: InvestigationGraphNode = {
+    id: id(4),
+    role: "INTERMEDIARY",
+    risk: "MEDIUM",
+    inflow: 0,
+    outflow: 0,
+    transactions: 0,
+  };
+  const dest: InvestigationGraphNode = {
+    id: id(5),
+    role: "DESTINATION",
+    risk: "LOW",
+    inflow: 0,
+    outflow: 0,
+    transactions: 0,
+  };
+  const exitA: InvestigationGraphNode = {
+    id: id(6),
+    role: "EXIT",
+    risk: "HIGH",
+    inflow: 0,
+    outflow: 0,
+    transactions: 0,
+  };
+  const exitB: InvestigationGraphNode = {
+    id: id(7),
+    role: "EXIT",
+    risk: "HIGH",
+    inflow: 0,
+    outflow: 0,
+    transactions: 0,
+  };
+
+  const r = (f: number) => Math.round(taintedAmount * f);
+  const mkEdge = (
+    n: number,
+    src: string,
+    tgt: string,
+    fraction: number,
+    minutesAgo: number,
+  ): InvestigationGraphEdge => ({
+    id: `TXN-${(90000 + n * 7 + (investigationId.length % 5)).toString()}`,
+    source: src,
+    target: tgt,
+    amount: r(fraction),
+    currency: "INR",
+    timestamp: new Date(Date.parse(DEMO_NOW) - minutesAgo * 60_000).toISOString(),
+  });
+
+  const edges: InvestigationGraphEdge[] = [
+    mkEdge(1, source.id, muleA.id, 0.42, 96),
+    mkEdge(2, source.id, muleB.id, 0.38, 90),
+    mkEdge(3, muleA.id, interA.id, 0.30, 72),
+    mkEdge(4, muleA.id, interB.id, 0.12, 66),
+    mkEdge(5, muleB.id, interB.id, 0.26, 60),
+    mkEdge(6, muleB.id, interA.id, 0.12, 54),
+    mkEdge(7, interA.id, dest.id, 0.24, 42),
+    mkEdge(8, interB.id, dest.id, 0.28, 36),
+    mkEdge(9, dest.id, exitA.id, 0.20, 24),
+    mkEdge(10, dest.id, exitB.id, 0.14, 18),
+  ];
+
+  const nodes = [
+    source,
+    muleA,
+    muleB,
+    interA,
+    interB,
+    dest,
+    exitA,
+    exitB,
+  ];
+  for (const node of nodes) {
+    const incoming = edges.filter((e) => e.target === node.id);
+    const outgoing = edges.filter((e) => e.source === node.id);
+    node.inflow = incoming.reduce((sum, e) => sum + e.amount, 0);
+    node.outflow = outgoing.reduce((sum, e) => sum + e.amount, 0);
+    node.transactions = incoming.length + outgoing.length;
+  }
+
+  return { nodes, edges };
+}
+
 function buildCaseInvestigation(caseData: Case): Investigation {
   const seed = seedAlertFor(caseData.id);
   const detail = CASE_DETAILS[caseData.id] ?? {
@@ -209,6 +355,11 @@ function buildCaseInvestigation(caseData: Case): Investigation {
     ),
     evidenceSummary: buildEvidenceSummary(detail.transactions, findings),
     moneyFlow: buildMoneyFlow(caseData.taintedAmount),
+    graph: buildGraph(
+      caseData.id,
+      seed?.accountId ?? "acct_unknown",
+      caseData.taintedAmount,
+    ),
   };
 }
 
@@ -236,6 +387,7 @@ function buildAlertInvestigation(alert: Alert): Investigation {
     timeline: buildTimeline(alert.id, alert, "Unassigned", alert.timestamp),
     evidenceSummary: buildEvidenceSummary(transactions, findings),
     moneyFlow: buildMoneyFlow(alert.taintedAmount),
+    graph: buildGraph(alert.id, alert.accountId, alert.taintedAmount),
   };
 }
 
