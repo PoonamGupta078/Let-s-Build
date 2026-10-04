@@ -1,11 +1,39 @@
 # SecureTrace (SecureLedger × TraceX)
-Follow the rupee, cut the ring: graph-based fund-flow tracking, rupee-level taint tracing (TRACE),
-hold recommendations (CUT) and a Cline-powered investigator copilot. Recommendation only: a human decides.
+
+An **AML investigation prototype**: graph-based fund-flow analysis for anti-money-laundering
+investigators. Follow the rupee, cut the ring. It combines explainable suspicious-activity
+detection (SEE), estimated suspicious-fund propagation (TRACE), intervention recommendations
+(CUT), and preliminary machine-learning experiments.
+
+**Recommendation only — a human decides.** SecureTrace never executes a freeze. Traced amounts
+are *estimates* (fungible money cannot be traced exactly). The project is not production-ready,
+not regulatory-compliant, and does not claim proven fraud-detection effectiveness.
 
 ## Run
     python -m venv .venv && source .venv/bin/activate     # Windows: .venv\Scripts\activate
     pip install -r requirements.txt
-    python -m pytest -q                                   # full suite: 151 passing
+    python -m pytest -q                                   # full suite: 179 passing
+
+## Demo (one command)
+
+    python scripts/run_demo.py
+
+Runs the synthetic SEE → TRACE → CUT workflow end-to-end (S → M1/M2 → CASH). Requires no
+Neo4j, API server, frontend dependencies, credentials, or the full 4.5M-row dataset.
+
+Frontend (mock-data UI — not yet connected to the backend):
+
+    cd frontend && npm install && npm run dev      # http://localhost:3000
+
+### Demo limitations
+- The demo uses a **synthetic case**, not a claim of real-world fraud-detection accuracy.
+- The **frontend** currently uses mock data and is **not connected** to the backend.
+- The **API** and **copilot** are **not implemented**.
+- **ML experiments** remain preliminary and severely class-imbalanced (PR-AUC < 0.02).
+- The current experiment JSON files contain the **100k-sample** run; the documented earlier
+  full-data baseline results are not present in the current artifacts.
+- **Not production-ready or regulatory-compliant.** Fund propagation is estimated; money is
+  fungible; recommendations are advisory and a human decides.
 
 ## Neo4j setup (optional)
 - Prerequisites: Neo4j 4.4+ or 5.x server, reachable from this machine.
@@ -30,8 +58,29 @@ hold recommendations (CUT) and a Cline-powered investigator copilot. Recommendat
 
 ## Layout
 core/ (TRACE + CUT, done) · ingestion/ graph/ see/ (SEE detection, done) ·
-neo4j/ (integration, done) · models/ detect/ fusion/ alerts/ evidence/ (to build) ·
-api/ copilot/ frontend/ scripts/ · docs/ · vendor/tracex (read-only reference) · .clinerules/
+neo4j/ (integration, done) · trace/ cut/ (wrappers, done) · models/ (ML baseline + GNN, experimental) ·
+frontend/ (dashboard, alerts, workspace — mock data) ·
+detect/ fusion/ alerts/ evidence/ api/ copilot/ (not started) ·
+scripts/ · docs/ · vendor/tracex (read-only reference) · .clinerules/
 
 ## Reused vs built
-Fill in at the end: what comes from TraceX / SecureLedger and what was built during the hackathon.
+- **vendor/tracex** is a read-only reference (TraceX-FinTech code) intended for detect/, evidence/
+  and ingestion/. It has known defects (see its README) and has **not** been imported or adapted yet.
+- Everything implemented so far — ingestion, graph, SEE rules, TRACE/CUT wrappers, Neo4j
+  integration, ML baseline + GNN, and the frontend — was written during the hackathon.
+
+## Machine-learning status (experimental)
+`models/` holds a first-pass tabular baseline (Dummy / Logistic Regression / HistGradientBoosting)
+and a numpy-based 2-layer GCN. On the highly imbalanced IBM AML dataset (~0.1% positive), the
+models are honest but weak:
+
+| Model | Test PR-AUC | Test ROC-AUC |
+|---|---|---|
+| Dummy | 0.0029 | 0.5000 |
+| Logistic Regression | 0.0067 | 0.7865 |
+| HistGradientBoosting | 0.0133 | 0.5695 |
+| GNN (100k sample) | 0.0107 | 0.7606 |
+
+The GNN ranks above random (ROC-AUC ≈ 0.76) but its validation-selected threshold detected
+**0** of the 28 positive test examples (only 7 positive validation examples). These results are
+preliminary and do **not** prove practical fraud-detection effectiveness. See `docs/ml_baseline.md`.

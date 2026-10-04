@@ -33,13 +33,19 @@ Only the aggregate `clean_held` is reported.
 
 ## Currency policy
 
-- **Currency column present:** runs the CUT engine independently per currency.
-  Seeds and transactions are filtered to one currency per run.
-  Results are never summed across currencies.
-- **Currency column absent:** runs once with the documented single-currency
-  assumption.  `seed_currency` is recorded in the result config.
-- **Multiple currencies + no currency column:** rejects as ambiguous rather
-  than silently mixing.
+- **No currency column:** runs once with the documented single-currency
+  assumption.  If ``seed_currency`` is supplied, it is recorded; otherwise
+  ``"UNKNOWN"`` is used.  No FX conversion is performed.
+- **Currency column present, single value:** accepts the input.  If
+  ``seed_currency`` is supplied, it must match the value in the data.
+  If omitted, the currency is inferred from the data automatically.
+- **Currency column present, multiple values:** raises ``ValueError``.
+  CUT requires a single currency per run — the caller must filter the
+  transaction data before calling.
+- **Currency column present, all null/NaN:** raises ``ValueError`` unless
+  ``seed_currency`` is supplied, in which case it is used as the label.
+- **``recommend_from_trace()``** validates that ``trace_result.seed_currency``
+  matches the transaction data's currency and raises ``ValueError`` on conflict.
 
 ## Output models
 

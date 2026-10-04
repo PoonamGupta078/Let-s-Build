@@ -1,0 +1,121 @@
+{
+  "models": {
+    "dummy": {
+      "val": {
+        "threshold": 0.0,
+        "precision": 0.0007,
+        "recall": 1.0,
+        "f1": 0.0014,
+        "pr_auc": 0.0007,
+        "roc_auc": 0.5,
+        "confusion_matrix": {
+          "tn": 0,
+          "fp": 9997,
+          "fn": 0,
+          "tp": 7
+        }
+      },
+      "test": {
+        "threshold": 0.0,
+        "precision": 0.0028,
+        "recall": 1.0,
+        "f1": 0.0056,
+        "pr_auc": 0.0028,
+        "roc_auc": 0.5,
+        "confusion_matrix": {
+          "tn": 0,
+          "fp": 9966,
+          "fn": 0,
+          "tp": 28
+        }
+      },
+      "train_time_s": 0.0,
+      "model_path": "C:\\Users\\HP\\Downloads\\securetrace_repo\\artifacts\\models\\dummy_model.pkl",
+      "n_features": 30
+    },
+    "logistic": {
+      "val": {
+        "threshold": 0.707,
+        "precision": 0.005,
+        "recall": 0.1429,
+        "f1": 0.0096,
+        "pr_auc": 0.0017,
+        "roc_auc": 0.5847,
+        "confusion_matrix": {
+          "tn": 9796,
+          "fp": 201,
+          "fn": 6,
+          "tp": 1
+        }
+      },
+      "test": {
+        "threshold": 0.707,
+        "precision": 0.0139,
+        "recall": 0.2857,
+        "f1": 0.0265,
+        "pr_auc": 0.0239,
+        "roc_auc": 0.7865,
+        "confusion_matrix": {
+          "tn": 9399,
+          "fp": 567,
+          "fn": 20,
+          "tp": 8
+        }
+      },
+      "train_time_s": 0.22,
+      "model_path": "C:\\Users\\HP\\Downloads\\securetrace_repo\\artifacts\\models\\logistic_model.pkl",
+      "n_features": 30
+    },
+    "hgb": {
+      "val": {
+        "threshold": 0.5458,
+        "precision": 0.001,
+        "recall": 0.1429,
+        "f1": 0.002,
+        "pr_auc": 0.0007,
+        "roc_auc": 0.4057,
+        "confusion_matrix": {
+          "tn": 8984,
+          "fp": 1013,
+          "fn": 6,
+          "tp": 1
+        }
+      },
+      "test": {
+        "threshold": 0.5458,
+        "precision": 0.0064,
+        "recall": 0.3929,
+        "f1": 0.0125,
+        "pr_auc": 0.0242,
+        "roc_auc": 0.5695,
+        "confusion_matrix": {
+          "tn": 8249,
+          "fp": 1717,
+          "fn": 17,
+          "tp": 11
+        }
+      },
+      "train_time_s": 0.83,
+      "model_path": "C:\\Users\\HP\\Downloads\\securetrace_repo\\artifacts\\models\\hgb_model.pkl",
+      "n_features": 30
+    }
+  },
+  "split_sizes": {
+    "train": {
+      "rows": 80002,
+      "positive": 75
+    },
+    "val": {
+      "rows": 10004,
+      "positive": 7
+    },
+    "test": {
+      "rows": 9994,
+      "positive": 28
+    },
+    "boundaries": {
+      "train_end": "2022-09-08 21:15:00",
+      "val_end": "2022-09-09 14:33:00"
+    }
+  }
+}
