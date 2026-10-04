@@ -1,0 +1,117 @@
+{
+  "models": {
+    "dummy": {
+      "val": {
+        "threshold": 0.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "pr_auc": 1.0,
+        "roc_auc": NaN,
+        "confusion_matrix": {
+          "tn": 0,
+          "fp": 0,
+          "fn": 0,
+          "tp": 0
+        }
+      },
+      "test": {
+        "threshold": 0.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "pr_auc": 1.0,
+        "roc_auc": NaN,
+        "confusion_matrix": {
+          "tn": 0,
+          "fp": 0,
+          "fn": 0,
+          "tp": 0
+        }
+      },
+      "train_time_s": 0.04,
+      "model_path": "C:\\Users\\HP\\Downloads\\securetrace_repo\\artifacts\\models\\dummy_model.pkl",
+      "n_features": 30
+    },
+    "logistic": {
+      "val": {
+        "threshold": 0.6185,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "pr_auc": 1.0,
+        "roc_auc": NaN,
+        "confusion_matrix": {
+          "tn": 0,
+          "fp": 0,
+          "fn": 0,
+          "tp": 0
+        }
+      },
+      "test": {
+        "threshold": 0.6185,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "pr_auc": 1.0,
+        "roc_auc": NaN,
+        "confusion_matrix": {
+          "tn": 0,
+          "fp": 0,
+          "fn": 0,
+          "tp": 0
+        }
+      },
+      "train_time_s": 1.61,
+      "model_path": "C:\\Users\\HP\\Downloads\\securetrace_repo\\artifacts\\models\\logistic_model.pkl",
+      "n_features": 30
+    },
+    "hgb": {
+      "val": {
+        "threshold": 0.6396,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "pr_auc": 1.0,
+        "roc_auc": NaN,
+        "confusion_matrix": {
+          "tn": 0,
+          "fp": 0,
+          "fn": 0,
+          "tp": 0
+        }
+      },
+      "test": {
+        "threshold": 0.6396,
+        "precision": 1.0,
+        "recall": 0.5,
+        "f1": 0.6667,
+        "pr_auc": 1.0,
+        "roc_auc": NaN,
+        "confusion_matrix": {
+          "tn": 0,
+          "fp": 0,
+          "fn": 1,
+          "tp": 1
+        }
+      },
+      "train_time_s": 8.17,
+      "model_path": "C:\\Users\\HP\\Downloads\\securetrace_repo\\artifacts\\models\\hgb_model.pkl",
+      "n_features": 30
+    }
+  },
+  "split_sizes": {
+    "train": {
+      "rows": 199997,
+      "positive": 238
+    },
+    "val": {
+      "rows": 1,
+      "positive": 1
+    },
+    "test": {
+      "rows": 2,
+      "positive": 2
+    }
+  }
+}

@@ -43,6 +43,12 @@ vendor/tracex = read-only TraceX reference code to adapt.
   advisory-only output with structured evidence, rationale, and disclaimers.
   38 tests (greedy/block_all, ranking, validation, serialization, regression).
   Full suite: 151 passing.
+- ML baseline + GNN (models/config.py, features.py, train.py, evaluate.py, gnn.py):
+  done.  Tabular baseline (Dummy, Logistic, HGB) and numpy-based 2-layer GCN.
+  Full 4.5M-row baseline and 200k-sample GNN completed.
+  16 new tests. Full suite: 174 passing.
+  Known limitation: chronological split produces tiny val/test with near-zero
+  negatives; metrics not yet meaningful for model comparison.
 - Everything else: not started.
 
 ## Glossary

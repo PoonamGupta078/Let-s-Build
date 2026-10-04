@@ -284,9 +284,99 @@ def test_seed_currency_recorded():
 
 
 def test_unknown_currency_default():
+    """No currency column + no seed_currency → records UNKNOWN."""
     r = recommend(RING, SEEDS, EXITS, t_alert=m(20))
     for rec in r.recommendations:
         assert rec.currency == "UNKNOWN"
+
+
+def test_mixed_currencies_rejected():
+    """Transaction data with multiple currencies must raise ValueError."""
+    txns = pd.DataFrame([
+        ("t1", m(10), "S", "M1", 500_000, "USD"),
+        ("t2", m(10), "S", "M2", 500_000, "EUR"),
+    ], columns=["txn_id", "ts", "src", "dst", "amount", "currency"])
+    with pytest.raises(ValueError, match="mixed currencies"):
+        recommend(txns, SEEDS, EXITS, t_alert=m(20))
+
+
+def test_null_currency_values_rejected_without_seed_currency():
+    """All-null currency column without seed_currency must raise ValueError."""
+    txns = pd.DataFrame([
+        ("t1", m(10), "S", "M1", 500_000, None),
+        ("t2", m(10), "S", "M2", 500_000, None),
+    ], columns=["txn_id", "ts", "src", "dst", "amount", "currency"])
+    with pytest.raises(ValueError, match="all values are missing"):
+        recommend(txns, SEEDS, EXITS, t_alert=m(20))
+
+
+def test_null_currency_with_seed_currency_allowed():
+    """All-null currency + explicit seed_currency → uses seed_currency."""
+    txns = pd.DataFrame([
+        ("s1", m(10), "S", "M1", 500_000, None),
+        ("s2", m(10), "S", "M2", 500_000, None),
+        ("e1", m(40), "M1", "CASH", 500_000, None),
+        ("e2", m(40), "M2", "CASH", 500_000, None),
+    ], columns=["txn_id", "ts", "src", "dst", "amount", "currency"])
+    r = recommend(txns, SEEDS, EXITS, t_alert=m(20), seed_currency="USD")
+    assert r.config["seed_currency"] == "USD"
+    assert len(r.recommendations) > 0
+
+
+def test_seed_currency_conflicts_with_data():
+    """seed_currency="EUR" but data has only USD → must raise ValueError."""
+    txns = pd.DataFrame([
+        ("s1", m(10), "S", "M1", 500_000, "USD"),
+        ("s2", m(10), "S", "M2", 500_000, "USD"),
+        ("e1", m(40), "M1", "CASH", 500_000, "USD"),
+        ("e2", m(40), "M2", "CASH", 500_000, "USD"),
+    ], columns=["txn_id", "ts", "src", "dst", "amount", "currency"])
+    with pytest.raises(ValueError, match="does not match"):
+        recommend(txns, SEEDS, EXITS, t_alert=m(20), seed_currency="EUR")
+
+
+def test_trace_seed_currency_conflicts_with_data():
+    """recommend_from_trace must raise when trace seed currency mismatches txn data."""
+    txns = pd.DataFrame([
+        ("s1", m(10), "S", "M1", 500_000, "USD"),
+        ("s2", m(10), "S", "M2", 500_000, "USD"),
+        ("e1", m(40), "M1", "CASH", 500_000, "USD"),
+        ("e2", m(40), "M2", "CASH", 500_000, "USD"),
+    ], columns=["txn_id", "ts", "src", "dst", "amount", "currency"])
+    trace_result = TraceResult(
+        alert_id="see-test", seed_account="S", seed_amount=1_000_000.0,
+        seed_currency="EUR", seed_ts=str(T0), config={},
+        tainted_accounts={}, tainted_edges={},
+        exit_taint_by_currency={}, paths=(),
+    )
+    with pytest.raises(ValueError, match="does not match"):
+        recommend_from_trace(txns, trace_result, EXITS, t_alert=m(20))
+
+
+def test_valid_single_currency_with_column():
+    """Single-currency data with matching seed_currency works correctly."""
+    txns = pd.DataFrame([
+        ("s1", m(10), "S", "M1", 500_000, "USD"),
+        ("s2", m(10), "S", "M2", 500_000, "USD"),
+        ("e1", m(40), "M1", "CASH", 500_000, "USD"),
+        ("e2", m(40), "M2", "CASH", 500_000, "USD"),
+    ], columns=["txn_id", "ts", "src", "dst", "amount", "currency"])
+    r = recommend(txns, SEEDS, EXITS, t_alert=m(20), seed_currency="USD")
+    assert len(r.recommendations) > 0
+    for rec in r.recommendations:
+        assert rec.currency == "USD"
+
+
+def test_single_currency_without_seed_currency_infers():
+    """Single currency in data, no seed_currency → infers from data."""
+    txns = pd.DataFrame([
+        ("s1", m(10), "S", "M1", 500_000, "GBP"),
+        ("s2", m(10), "S", "M2", 500_000, "GBP"),
+        ("e1", m(40), "M1", "CASH", 500_000, "GBP"),
+        ("e2", m(40), "M2", "CASH", 500_000, "GBP"),
+    ], columns=["txn_id", "ts", "src", "dst", "amount", "currency"])
+    r = recommend(txns, SEEDS, EXITS, t_alert=m(20))
+    assert r.config["seed_currency"] == "GBP"
 
 
 # --- core regression ---

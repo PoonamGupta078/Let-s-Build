@@ -55,6 +55,41 @@ def _validate_inputs(txns, seeds, exits, t_alert):
         raise ValueError(f"input contains {int((num < 0).sum())} row(s) with negative amounts")
 
 
+def _resolve_currency(txns, seed_currency):
+    """Determine the effective currency label, rejecting mixed or ambiguous inputs.
+
+    Returns a single currency string.  Raises ValueError when:
+    - The transaction DataFrame has a currency column with more than one
+      distinct non-null value (mixed currencies).
+    - All currency values are null/missing (ambiguous).
+    - ``seed_currency`` is supplied but does not match the currency found
+      in the data.
+    """
+    if "currency" not in txns.columns:
+        # No column: documented single-currency assumption.
+        return seed_currency or "UNKNOWN"
+    non_null = txns["currency"].dropna().unique().tolist()
+    if len(non_null) == 0:
+        if seed_currency is not None:
+            return seed_currency
+        raise ValueError(
+            "currency column is present but all values are missing/NaN; "
+            "pass seed_currency explicitly"
+        )
+    if len(non_null) > 1:
+        raise ValueError(
+            f"mixed currencies detected in transaction data: {sorted(non_null)}; "
+            f"CUT requires a single currency per run"
+        )
+    txn_currency = str(non_null[0])
+    if seed_currency is not None and seed_currency != txn_currency:
+        raise ValueError(
+            f"seed_currency {seed_currency!r} does not match transaction "
+            f"currency {txn_currency!r}"
+        )
+    return txn_currency
+
+
 def _get_evidence(taint_result, account, threshold):
     """Get evidence txn_ids for an account from taint result parents."""
     evidence = []
@@ -196,7 +231,7 @@ def recommend(
     config = config or CutConfig()
     _validate_inputs(txns, seeds, exits, t_alert)
     df = txns.copy()
-    effective_currency = seed_currency or "UNKNOWN"
+    effective_currency = _resolve_currency(df, seed_currency)
     if config.strategy == "greedy":
         return _greedy(df, seeds, exits, t_alert, config, effective_currency)
     else:

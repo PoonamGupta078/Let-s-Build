@@ -5,7 +5,7 @@ hold recommendations (CUT) and a Cline-powered investigator copilot. Recommendat
 ## Run
     python -m venv .venv && source .venv/bin/activate     # Windows: .venv\Scripts\activate
     pip install -r requirements.txt
-    python -m pytest -q                                   # full suite: 151 passing
+    python -m pytest -q                                   # full suite: 174 passing
 
 ## Neo4j setup (optional)
 - Prerequisites: Neo4j 4.4+ or 5.x server, reachable from this machine.
