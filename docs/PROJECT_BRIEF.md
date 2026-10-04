@@ -43,10 +43,13 @@ vendor/tracex = read-only TraceX reference code to adapt.
   Full suite: 151 passing.
 - ML baseline + GNN (models/config.py, features.py, train.py, evaluate.py, gnn.py):
   done.  Tabular baseline (Dummy, Logistic, HGB) and numpy-based 2-layer GCN.
-  Full 4.5M-row baseline and 200k-sample GNN completed.
-  16 new tests. Full suite: 174 passing.
-  Known limitation: chronological split produces tiny val/test with near-zero
-  negatives; metrics not yet meaningful for model comparison.
+  Full 4.5M-row baseline and 100k-sample GNN completed.
+  Chronological split now computed from data percentiles (80th/90th) instead of
+  hardcoded dates; no row loss; 4 new regression tests. Full suite: 178 passing.
+  Results are honest but weak (test PR-AUC < 0.02); the GNN ranks above random
+  (ROC-AUC ≈ 0.76) but its validation-selected threshold missed all 28 test
+  positives (only 7 val positives). Preliminary only — not production-grade;
+  see docs/ml_baseline.md.
 - Frontend prompt 1 (foundation + dashboard), prompt 2 (Alerts & Cases queue) and
   prompt 3 (Investigation Workspace): done. Frontend only; lint + build clean.
 - Everything else (graph visualisation via Cytoscape, evidence generation, API, copilot): not started.

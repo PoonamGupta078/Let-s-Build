@@ -35,13 +35,42 @@ def load_data(sample_size: int = 0):
 
 
 def split_data(txns, labels, cfg: SplitConfig):
+    """Chronological split with data-driven or config boundaries.
+
+    Policy: transactions with identical timestamps are kept together
+    (not split across partitions) to prevent same-time information leakage.
+    """
     y = labels.set_index("txn_id")["is_laundering"]
     txns = txns.copy()
     txns["label"] = txns["txn_id"].map(y).fillna(0).astype(int)
-    train = txns[txns.ts <= cfg.train_end]
-    val   = txns[(txns.ts > cfg.train_end) & (txns.ts <= cfg.val_end)]
-    test  = txns[txns.ts > cfg.val_end]
-    return train, val, test
+
+    # Compute boundaries
+    train_end, val_end = cfg.compute_boundaries(txns["ts"])
+
+    # Split
+    train = txns[txns.ts <= train_end].copy()
+    val   = txns[(txns.ts > train_end) & (txns.ts <= val_end)].copy()
+    test  = txns[txns.ts > val_end].copy()
+
+    # Assertions
+    total_retained = len(train) + len(val) + len(test)
+    assert total_retained == len(txns), (
+        f"Row loss: {len(txns)} input, {total_retained} retained"
+    )
+    assert len(set(train.index) & set(val.index)) == 0, "train/val overlap"
+    assert len(set(val.index) & set(test.index)) == 0, "val/test overlap"
+    assert len(set(train.index) & set(test.index)) == 0, "train/test overlap"
+    if len(val) > 0 and len(train) > 0:
+        assert val["ts"].min() >= train["ts"].max(), "val timestamps not after train"
+    if len(test) > 0 and len(val) > 0:
+        assert test["ts"].min() >= val["ts"].max(), "test timestamps not after val"
+
+    # Report boundary info
+    boundary_info = {
+        "train_end": str(train_end),
+        "val_end": str(val_end),
+    }
+    return train, val, test, boundary_info
 
 
 def build_adjacency(train_txns, account_map, n_nodes):
@@ -113,16 +142,23 @@ def main():
 
     print("Loading data...")
     txns, labels = load_data(cfg.sample_size)
+    ts_min, ts_max = txns["ts"].min(), txns["ts"].max()
     print(f"  {len(txns)} transactions, {int(labels.is_laundering.sum())} positive")
+    print(f"  timestamp range: {ts_min} to {ts_max}")
+    print(f"  unique timestamps: {txns['ts'].nunique()}")
 
     print("Splitting...")
-    train, val, test = split_data(txns, labels, cfg.split)
+    train, val, test, boundary_info = split_data(txns, labels, cfg.split)
+    print(f"  boundaries: train_end={boundary_info['train_end']}, val_end={boundary_info['val_end']}")
     split_sizes = {
         "train": {"rows": len(train), "positive": int(train.label.sum())},
         "val":   {"rows": len(val),   "positive": int(val.label.sum())},
         "test":  {"rows": len(test),  "positive": int(test.label.sum())},
+        "boundaries": boundary_info,
     }
     for k, v in split_sizes.items():
+        if k == "boundaries":
+            continue
         print(f"  {k}: {v['rows']} rows, {v['positive']} positive")
 
     print("Building features...")

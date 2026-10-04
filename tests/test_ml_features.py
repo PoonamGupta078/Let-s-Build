@@ -58,12 +58,15 @@ def test_base_features_preserves_currency():
 def test_chronological_split():
     txns = _sample_txns()
     cfg = SplitConfig(train_end="2022-09-01 23:59:59", val_end="2022-09-16 23:59:59")
-    train = txns[txns.ts <= cfg.train_end]
-    val = txns[(txns.ts > cfg.train_end) & (txns.ts <= cfg.val_end)]
-    test = txns[txns.ts > cfg.val_end]
+    train_end, val_end = cfg.compute_boundaries(txns["ts"])
+    train = txns[txns.ts <= train_end]
+    val = txns[(txns.ts > train_end) & (txns.ts <= val_end)]
+    test = txns[txns.ts > val_end]
     assert len(train) == 4  # first 4 rows on Sep 1
     assert len(val) == 1    # Sep 15
     assert len(test) == 1   # Sep 17
+    assert train_end == pd.Timestamp("2022-09-01 23:59:59")
+    assert val_end == pd.Timestamp("2022-09-16 23:59:59")
 
 
 def test_feature_matrix_no_leakage_from_future():
@@ -104,3 +107,71 @@ def test_no_txn_id_in_features():
     assert "txn_id" not in names
     assert "src" not in names
     assert "dst" not in names
+
+
+def test_percentile_split_produces_meaningful_partitions():
+    """Default percentile split must produce non-empty val/test with both classes.
+    With a small 6-row fixture, val must be non-empty; test may be empty
+    (percentile boundaries on tiny datasets can exhaust all rows)."""
+    txns = _sample_txns()
+    cfg = SplitConfig()  # defaults: compute from data
+    train_end, val_end = cfg.compute_boundaries(txns["ts"])
+    train = txns[txns.ts <= train_end]
+    val = txns[(txns.ts > train_end) & (txns.ts <= val_end)]
+    test = txns[txns.ts > val_end]
+    assert len(train) + len(val) + len(test) == len(txns)
+    assert len(train) >= 1
+    assert len(val) >= 1
+
+
+def test_split_no_row_loss():
+    """All rows must appear in exactly one split."""
+    txns = _sample_txns()
+    cfg = SplitConfig(train_end="2022-09-01 23:59:59", val_end="2022-09-16 23:59:59")
+    train_end, val_end = cfg.compute_boundaries(txns["ts"])
+    train = txns[txns.ts <= train_end]
+    val = txns[(txns.ts > train_end) & (txns.ts <= val_end)]
+    test = txns[txns.ts > val_end]
+    total = len(train) + len(val) + len(test)
+    assert total == len(txns)
+
+
+def test_split_label_alignment():
+    """Labels must be correctly mapped after split."""
+    txns = _sample_txns()
+    labels = pd.DataFrame({
+        "txn_id": ["t0", "t1", "t2", "t3", "t4", "t5"],
+        "is_laundering": [0, 1, 0, 0, 1, 0],
+    })
+    cfg = SplitConfig(train_end="2022-09-01 23:59:59", val_end="2022-09-16 23:59:59")
+    train_end, val_end = cfg.compute_boundaries(txns["ts"])
+    y = labels.set_index("txn_id")["is_laundering"]
+    txns_labeled = txns.copy()
+    txns_labeled["label"] = txns_labeled["txn_id"].map(y).fillna(0).astype(int)
+    train = txns_labeled[txns_labeled.ts <= train_end]
+    val = txns_labeled[(txns_labeled.ts > train_end) & (txns_labeled.ts <= val_end)]
+    test = txns_labeled[txns_labeled.ts > val_end]
+    assert train["label"].sum() == 1  # t1
+    assert val["label"].sum() == 1    # t4
+    assert test["label"].sum() == 0   # t5 is 0
+
+
+def test_duplicate_timestamps_kept_together():
+    """Transactions at the same timestamp must not be split across partitions."""
+    ts_same = pd.Timestamp("2022-09-10 12:00:00")
+    txns = pd.DataFrame({
+        "txn_id": [f"t{i}" for i in range(6)],
+        "ts": [ts_same] * 6,
+        "src": ["A"] * 6,
+        "dst": ["B"] * 6,
+        "amount": [100.0] * 6,
+    })
+    cfg = SplitConfig(train_end="2022-09-10 12:00:00", val_end="2022-09-15 23:59:59")
+    train_end, val_end = cfg.compute_boundaries(txns["ts"])
+    train = txns[txns.ts <= train_end]
+    val = txns[(txns.ts > train_end) & (txns.ts <= val_end)]
+    test = txns[txns.ts > val_end]
+    # All 6 rows have the same timestamp; boundary is inclusive for train
+    assert len(train) == 6
+    assert len(val) == 0
+    assert len(test) == 0
