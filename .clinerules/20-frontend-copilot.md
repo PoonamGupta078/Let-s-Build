@@ -1,0 +1,3 @@
+- Frontend: Next.js + TypeScript + Cytoscape. Reuse components instead of writing new ones.
+- Copilot: Node 22 + @cline/sdk, TypeScript. Tools are read-only wrappers over the FastAPI routes.
+- Before using the SDK, read its README/docs and confirm real function names. Never invent APIs.

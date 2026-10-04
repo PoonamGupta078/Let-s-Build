@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+node_modules/
+.next/
+.env
+data/*.csv
+models/weights/*
+!models/weights/.gitkeep
+*.pdf
+.pytest_cache/

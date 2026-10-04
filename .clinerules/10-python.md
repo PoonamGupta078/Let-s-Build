@@ -1,0 +1,2 @@
+- Python 3.11, pandas/NetworkX. Core logic stays pure (no I/O) so it is testable.
+- API: FastAPI + pydantic schemas in api/schemas.py. Return JSON that matches docs/api_contract.md exactly.

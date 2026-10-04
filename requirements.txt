@@ -1,0 +1,10 @@
+pandas
+numpy
+networkx
+scikit-learn
+fastapi
+uvicorn
+httpx
+pydantic
+fpdf2
+pytest
